@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -17,11 +17,7 @@ func main() {
 	sequenceNumber := 1
 	signBit := 0
 	log.Println("Snowflake ID: ",
-		generateSnowflakeID(intToBinaryString(signBit),
-			intToBinaryString(int(timestamp)),
-			intToBinaryString(datacenterID),
-			intToBinaryString(machineID),
-			intToBinaryString(sequenceNumber)),
+		generateSnowflakeID(signBit, timestamp, datacenterID, machineID, sequenceNumber),
 	)
 }
 
@@ -29,15 +25,25 @@ func getCurrentTimestamp() int64 {
 	return time.Now().UnixMilli() - epochMilli
 }
 
-func intToBinaryString(n int) string {
-	return strconv.FormatInt(int64(n), 2)
+func intToBinaryString(n int, length int) string {
+	binaryStr := strconv.FormatInt(int64(n), 2)
+	return padString(binaryStr, length)
 }
 
-func generateSnowflakeBinary(signBit string, timestamp string, datacenterID string, machineID string, sequenceNumber string) string {
-	return signBit + padString(timestamp, 41) + padString(datacenterID, 5) + padString(machineID, 5) + padString(sequenceNumber, 12)
+func generateSnowflakeBinary(signBit int, timestamp int64, datacenterID int, machineID int, sequenceNumber int) string {
+	var builder strings.Builder
+	builder.Grow(64) // Preallocate memory for the builder
+
+	builder.WriteString(intToBinaryString(signBit, 1))
+	builder.WriteString(intToBinaryString(int(timestamp), 41))
+	builder.WriteString(intToBinaryString(datacenterID, 5))
+	builder.WriteString(intToBinaryString(machineID, 5))
+	builder.WriteString(intToBinaryString(sequenceNumber, 12))
+
+	return builder.String()
 }
 
-func generateSnowflakeID(signBit string, timestamp string, datacenterID string, machineID string, sequenceNumber string) int64 {
+func generateSnowflakeID(signBit int, timestamp int64, datacenterID int, machineID int, sequenceNumber int) int64 {
 	snowflakeBinary := generateSnowflakeBinary(signBit, timestamp, datacenterID, machineID, sequenceNumber)
 	snowflakeID, err := strconv.ParseInt(snowflakeBinary, 2, 64)
 	if err != nil {
@@ -47,5 +53,8 @@ func generateSnowflakeID(signBit string, timestamp string, datacenterID string, 
 }
 
 func padString(s string, length int) string {
-	return fmt.Sprintf("%0"+strconv.Itoa(length)+"s", s)
+	if len(s) >= length {
+		return s
+	}
+	return strings.Repeat("0", length-len(s)) + s
 }
