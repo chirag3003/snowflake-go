@@ -14,6 +14,7 @@ type Config struct {
 	SignBit            int    // Sign bit
 	datacenterIDBinary string // Binary representation of the datacenter ID
 	machineIDBinary    string // Binary representation of the machine ID
+	lastTimestamp      int64
 }
 
 // HyperFlakeID represents a decoded Hyperflake ID.
@@ -82,7 +83,14 @@ func (config *Config) GenerateHyperflakeID() (int64, error) {
 	timestamp := lib.GetCurrentTimestampSinceEpoch(config.epoch)
 	signBitBinary := lib.IntToBinaryString(config.SignBit, 1)
 	timestampBinary := lib.IntToBinaryString(int(timestamp), 41)
-	sequenceNumberBinary := lib.IntToBinaryString(config.sequenceNumberBits, 12)
+	sequenceNumber := 0
+	if timestamp == config.lastTimestamp {
+		config.sequenceNumberBits++
+	} else {
+		config.sequenceNumberBits = 1
+		config.lastTimestamp = timestamp
+	}
+	sequenceNumberBinary := lib.IntToBinaryString(sequenceNumber, 12)
 
 	hyperflakeBinary := lib.BuildString(64,
 		signBitBinary,
