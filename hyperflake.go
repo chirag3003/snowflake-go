@@ -26,7 +26,7 @@ type HyperFlakeID struct {
 	Timestamp      int64 // Timestamp
 }
 
-var DefaultEpoch = time.Date(2010, time.November, 4, 1, 42, 54, 0, time.UTC)
+var DefaultEpoch = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
 var defaultEpochMilli = DefaultEpoch.UnixMilli()
 
 /*
