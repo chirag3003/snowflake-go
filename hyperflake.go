@@ -85,6 +85,7 @@ func (config *Config) GenerateHyperflakeID() (int64, error) {
 	timestampBinary := lib.IntToBinaryString(int(timestamp), 41)
 	sequenceNumber := 0
 	if timestamp == config.lastTimestamp {
+		sequenceNumber = config.sequenceNumberBits
 		config.sequenceNumberBits++
 	} else {
 		config.sequenceNumberBits = 1
