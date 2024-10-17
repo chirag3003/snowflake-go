@@ -77,8 +77,8 @@ func NewHyperflakeConfigWithEpoch(datacenterIDBits int, machineIDBits int, epoch
 	return config
 }
 
-// GenerateSnowflakeID generates a new Snowflake ID based on the current configuration.
-func (config *Config) GenerateSnowflakeID() (int64, error) {
+// GenerateHyperflakeID generates a new Hyperflake ID based on the current configuration.
+func (config *Config) GenerateHyperflakeID() (int64, error) {
 	timestamp := lib.GetCurrentTimestampSinceEpoch(config.epoch)
 	signBitBinary := lib.IntToBinaryString(config.SignBit, 1)
 	timestampBinary := lib.IntToBinaryString(int(timestamp), 41)
@@ -95,7 +95,7 @@ func (config *Config) GenerateSnowflakeID() (int64, error) {
 	return hyperflakeID, err
 }
 
-// DecodeID decodes a given Snowflake ID into its components.
+// DecodeID decodes a given Hyperflake ID into its components.
 func DecodeID(id int64) (*HyperFlakeID, error) {
 	// Convert the ID to a 64-bit binary string
 	hyperflakeBinary := lib.IntToBinaryString(int(id), 64)
