@@ -1,3 +1,3 @@
-module github.com/chirag3003/snowflake-go
+module github.com/chirag3003/hyperflake-go
 
 go 1.23.2
