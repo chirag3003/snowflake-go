@@ -6,32 +6,45 @@ import (
 	"time"
 )
 
+// HyperflakeConfig holds the configuration for generating Hyperflake IDs.
 type HyperflakeConfig struct {
-	epoch              int64
-	datacenterIDBits   int
-	machineIDBits      int
-	sequenceNumberBits int
-	SignBit            int
-	datacenterIDBinary string
-	machineIDBinary    string
+	epoch              int64  // Epoch timestamp in milliseconds
+	datacenterIDBits   int    // Number of bits for the datacenter ID
+	machineIDBits      int    // Number of bits for the machine ID
+	sequenceNumberBits int    // Number of bits for the sequence number
+	SignBit            int    // Sign bit
+	datacenterIDBinary string // Binary representation of the datacenter ID
+	machineIDBinary    string // Binary representation of the machine ID
 }
 
+// HyperFlakeID represents a decoded Hyperflake ID.
 type HyperFlakeID struct {
-	ID             int64
-	Signbit        int
-	DatacenterID   int
-	MachineID      int
-	SequenceNumber int
-	Timestamp      int64
+	ID             int64 // Original ID
+	Signbit        int   // Sign bit
+	DatacenterID   int   // Datacenter ID
+	MachineID      int   // Machine ID
+	SequenceNumber int   // Sequence number
+	Timestamp      int64 // Timestamp
 }
 
 var DefaultEpoch = time.Date(2010, time.November, 4, 1, 42, 54, 0, time.UTC)
 var defaultEpochMilli = DefaultEpoch.UnixMilli()
 
-func NewHyperflakeConfig(
-	datacenterIDBits int,
-	machineIDBits int,
-	signBit ...int) *HyperflakeConfig {
+/*
+NewHyperflakeConfig creates a new HyperflakeConfig with the given parameters.
+
+Parameters:
+  - datacenterIDBits:
+    Number of bits for the datacenter ID.
+  - machineIDBits:
+    Number of bits for the machine ID.
+  - signBit:
+    Optional sign bit (default is 0).
+
+Returns:
+- A pointer to the newly created HyperflakeConfig.
+*/
+func NewHyperflakeConfig(datacenterIDBits int, machineIDBits int, signBit ...int) *HyperflakeConfig {
 	sBit := 0
 	if len(signBit) > 0 {
 		sBit = signBit[0]
@@ -47,17 +60,25 @@ func NewHyperflakeConfig(
 	}
 }
 
-func NewHyperflakeConfigWithEpoch(
-	datacenterIDBits int,
-	machineIDBits int,
-	epoch int64,
-	signBit ...int,
-) *HyperflakeConfig {
+/*
+NewHyperflakeConfigWithEpoch creates a new HyperflakeConfig with the given parameters and a custom epoch.
+
+Parameters:
+- datacenterIDBits: Number of bits for the datacenter ID.
+- machineIDBits: Number of bits for the machine ID.
+- epoch: Custom epoch timestamp in milliseconds.
+- signBit: Optional sign bit (default is 0).
+
+Returns:
+- A pointer to the newly created HyperflakeConfig.
+*/
+func NewHyperflakeConfigWithEpoch(datacenterIDBits int, machineIDBits int, epoch int64, signBit ...int) *HyperflakeConfig {
 	config := NewHyperflakeConfig(datacenterIDBits, machineIDBits, signBit...)
 	config.epoch = epoch
 	return config
 }
 
+// GenerateSnowflakeID generates a new Snowflake ID based on the current configuration.
 func (config *HyperflakeConfig) GenerateSnowflakeID() (int64, error) {
 	timestamp := lib.GetCurrentTimestampSinceEpoch(config.epoch)
 	signBitBinary := lib.IntToBinaryString(config.SignBit, 1)
@@ -73,9 +94,9 @@ func (config *HyperflakeConfig) GenerateSnowflakeID() (int64, error) {
 	)
 	hyperflakeID, err := lib.BinaryStringToInt(hyperflakeBinary)
 	return hyperflakeID, err
-
 }
 
+// DecodeID decodes a given Snowflake ID into its components.
 func DecodeID(id int64) (*HyperFlakeID, error) {
 	// Convert the ID to a 64-bit binary string
 	hyperflakeBinary := lib.IntToBinaryString(int(id), 64)
@@ -127,23 +148,28 @@ func DecodeID(id int64) (*HyperFlakeID, error) {
 	return hyperflakeID, nil
 }
 
+// SetMachineID sets the machine ID in the configuration.
 func (config *HyperflakeConfig) SetMachineID(machineID int) {
 	config.machineIDBits = machineID
 	config.machineIDBinary = lib.IntToBinaryString(machineID, 5)
 }
 
+// SetDatacenterID sets the datacenter ID in the configuration.
 func (config *HyperflakeConfig) SetDatacenterID(datacenterID int) {
 	config.datacenterIDBits = datacenterID
 	config.datacenterIDBinary = lib.IntToBinaryString(datacenterID, 5)
 }
 
+// GetMachineID returns the machine ID from the configuration.
 func (config *HyperflakeConfig) GetMachineID() int {
 	return config.machineIDBits
 }
 
+// GetDatacenterID returns the datacenter ID from the configuration.
 func (config *HyperflakeConfig) GetDatacenterID() int {
 	return config.datacenterIDBits
 }
+
 func main() {
 	config := NewHyperflakeConfig(1, 1)
 	id, _ := config.GenerateSnowflakeID()
