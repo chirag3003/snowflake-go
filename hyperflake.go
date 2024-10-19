@@ -105,7 +105,7 @@ func (config *Config) GenerateHyperflakeID() (int64, error) {
 }
 
 // DecodeID decodes a given Hyperflake ID into its components.
-func DecodeID(id int64) (*HyperFlakeID, error) {
+func (config *Config) DecodeID(id int64) (*HyperFlakeID, error) {
 	// Convert the ID to a 64-bit binary string
 	hyperflakeBinary := lib.IntToBinaryString(int(id), 64)
 
