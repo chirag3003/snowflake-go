@@ -19,12 +19,13 @@ type Config struct {
 
 // HyperFlakeID represents a decoded Hyperflake ID.
 type HyperFlakeID struct {
-	ID             int64 // Original ID
-	Signbit        int   // Sign bit
-	DatacenterID   int   // Datacenter ID
-	MachineID      int   // Machine ID
-	SequenceNumber int   // Sequence number
-	Timestamp      int64 // Timestamp
+	ID                  int64 // Original ID
+	Signbit             int   // Sign bit
+	DatacenterID        int   // Datacenter ID
+	MachineID           int   // Machine ID
+	SequenceNumber      int   // Sequence number
+	TimestampSinceEpoch int64 // TimestampSinceEpoch since epoch
+	Timestamp           int64 // Timestamp
 }
 
 var DefaultEpoch = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -146,12 +147,13 @@ func (config *Config) DecodeID(id int64) (*HyperFlakeID, error) {
 
 	// Create and return the HyperFlakeID struct
 	hyperflakeID := &HyperFlakeID{
-		ID:             id,
-		Signbit:        int(signBit),
-		Timestamp:      timestamp,
-		DatacenterID:   int(datacenterID),
-		MachineID:      int(machineID),
-		SequenceNumber: int(sequenceNumber),
+		ID:                  id,
+		Signbit:             int(signBit),
+		TimestampSinceEpoch: timestamp,
+		Timestamp:           timestamp + config.epoch,
+		DatacenterID:        int(datacenterID),
+		MachineID:           int(machineID),
+		SequenceNumber:      int(sequenceNumber),
 	}
 	return hyperflakeID, nil
 }
